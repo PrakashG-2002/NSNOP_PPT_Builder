@@ -1,0 +1,275 @@
+<div class="lp" *ngIf="data" [class.editing]="editMode" (click)="onPreviewClick($event)">
+
+  <!-- backdrop for mobile bottom-sheet -->
+  <div class="ct-backdrop" *ngIf="editMode && picker.open && isMobile" (click)="closePicker()"></div>
+
+  <!-- FLOATING COLOUR TOOLBAR -->
+  <div class="color-toolbar" *ngIf="editMode && picker.open"
+       [class.mobile]="isMobile"
+       [style.left.px]="isMobile ? null : picker.x" [style.top.px]="isMobile ? null : picker.y"
+       (click)="$event.stopPropagation()">
+    <div class="ct-head">
+      <span class="ct-label">{{ picker.label }}</span>
+      <button class="ct-close" (click)="closePicker()">✕</button>
+    </div>
+    <div class="ct-swatches">
+      <button *ngFor="let s of swatches" class="ct-sw" [style.background]="s"
+              [class.active]="picker.hex.toLowerCase() === s.toLowerCase()" (click)="applySwatch(s)"></button>
+    </div>
+    <div class="ct-row">
+      <label class="ct-custom" title="Pick a colour">
+        <span class="ct-chip" [style.background]="picker.hex || '#ffffff'"></span>
+        <input type="color" [value]="picker.hex || '#000000'" (input)="onPickerInput($event)">
+      </label>
+      <input class="ct-hex" type="text" placeholder="#RRGGBB" [value]="picker.hex"
+             (input)="onHexInput($event)" (click)="$event.stopPropagation()" maxlength="7" spellcheck="false">
+      <button class="ct-clear" (click)="clearColor()">Reset</button>
+    </div>
+  </div>
+
+  <!-- NAV -->
+  <header class="nav">
+    <div class="wrap nav-inner">
+      <div class="brand">
+        <ng-container *ngIf="data.logo; else logoText">
+          <span class="img-edit">
+            <img class="logo-img" [src]="data.logo" alt="logo">
+            <span class="img-tools" *ngIf="editMode">
+              <label class="mini">Replace<input type="file" accept="image/*" (change)="replaceLogo($event)" hidden></label>
+              <button class="mini danger" (click)="removeLogo()">Remove</button>
+            </span>
+          </span>
+        </ng-container>
+        <ng-template #logoText>
+          <span class="logo-text" data-cid="brand" [style.color]="textColor('brand')" [attr.contenteditable]="editMode" (blur)="edit(data,'title',$event)">{{ data.title }}</span>
+          <label class="mini" *ngIf="editMode">Add logo<input type="file" accept="image/*" (change)="replaceLogo($event)" hidden></label>
+        </ng-template>
+      </div>
+      <nav class="navlinks">
+        <a *ngFor="let l of data.navLinks; let i = index" [href]="l.href" [attr.data-cid]="'nav'+i" [style.color]="textColor('nav'+i)">{{ l.label }}</a>
+      </nav>
+      <div class="nav-cta">
+        <a href="#about" class="btn btn-ghost" data-btn="nav-ghost" [style.borderColor]="btnColor('nav-ghost')" [style.color]="btnColor('nav-ghost')">Learn More</a>
+        <a href="#cta" class="btn btn-primary" data-btn="nav-primary" [style.background]="btnColor('nav-primary')">Contact</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <section class="hero" data-bg="hero" [style.background]="bgColor('hero')">
+    <div class="wrap hero-grid">
+      <div>
+        <span class="eyebrow" *ngIf="data.subtitle" data-cid="hero-eyebrow" [style.color]="textColor('hero-eyebrow')" [attr.contenteditable]="editMode" (blur)="edit(data,'subtitle',$event)">{{ data.subtitle }}</span>
+        <h1 data-cid="hero-title" [style.color]="textColor('hero-title')" [attr.contenteditable]="editMode" (blur)="edit(data,'title',$event)">{{ data.title }}</h1>
+        <p class="lead" data-cid="hero-lead" [style.color]="textColor('hero-lead')" [attr.contenteditable]="editMode" (blur)="edit(data,'intro',$event)">{{ data.intro }}</p>
+        <div class="hero-cta">
+          <a href="#about" class="btn btn-primary" data-btn="hero-primary" [style.background]="btnColor('hero-primary')">Learn More</a>
+          <a href="#cta" class="btn btn-ghost" data-btn="hero-ghost" [style.borderColor]="btnColor('hero-ghost')" [style.color]="btnColor('hero-ghost')">Contact</a>
+        </div>
+      </div>
+      <div class="hero-visual">
+        <div class="dots"></div>
+        <div class="blob"></div>
+        <div class="photo img-edit" *ngIf="data.heroImage; else heroPh">
+          <img [src]="data.heroImage" alt="hero">
+          <span class="img-tools" *ngIf="editMode">
+            <label class="mini">Replace<input type="file" accept="image/*" (change)="replaceHero($event)" hidden></label>
+            <button class="mini danger" (click)="removeHero()">Remove</button>
+          </span>
+        </div>
+        <ng-template #heroPh>
+          <div class="photo placeholder">
+            <span>No image</span>
+            <label class="mini" *ngIf="editMode">Add image<input type="file" accept="image/*" (change)="replaceHero($event)" hidden></label>
+          </div>
+        </ng-template>
+        <div class="hero-float f1" *ngIf="data.stats[0]">
+          <div>
+            <span class="big" data-cid="hf0v" [style.color]="textColor('hf0v')" [attr.contenteditable]="editMode" (blur)="edit(data.stats[0],'value',$event)">{{ data.stats[0].value }}</span>
+            <small data-cid="hf0l" [style.color]="textColor('hf0l')" [attr.contenteditable]="editMode" (blur)="edit(data.stats[0],'label',$event)">{{ data.stats[0].label }}</small>
+          </div>
+        </div>
+        <div class="hero-float f2" *ngIf="data.stats[1]">
+          <div>
+            <span class="big" data-cid="hf1v" [style.color]="textColor('hf1v')" [attr.contenteditable]="editMode" (blur)="edit(data.stats[1],'value',$event)">{{ data.stats[1].value }}</span>
+            <small data-cid="hf1l" [style.color]="textColor('hf1l')" [attr.contenteditable]="editMode" (blur)="edit(data.stats[1],'label',$event)">{{ data.stats[1].label }}</small>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STAT STRIP -->
+  <section class="stripe" data-bg="stripe" [style.background]="bgColor('stripe')">
+    <div class="wrap stripe-grid">
+      <div class="stripe-item" *ngFor="let s of data.stats; let i = index">
+        <button class="del-dot" *ngIf="editMode" (click)="removeFrom(data.stats, i)" title="Remove">×</button>
+        <div class="num" [attr.data-cid]="'st'+i+'v'" [style.color]="textColor('st'+i+'v')" [attr.contenteditable]="editMode" (blur)="edit(s,'value',$event)">{{ s.value }}</div>
+        <div class="lbl" [attr.data-cid]="'st'+i+'l'" [style.color]="textColor('st'+i+'l')" [attr.contenteditable]="editMode" (blur)="edit(s,'label',$event)">{{ s.label }}</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ABOUT -->
+  <section class="section" id="about" data-bg="about" [style.background]="bgColor('about')" *ngIf="data.intro">
+    <div class="wrap about-grid">
+      <div>
+        <span class="eyebrow">About</span>
+        <h2 class="section-title" data-cid="about-title" [style.color]="textColor('about-title')" [attr.contenteditable]="editMode" (blur)="edit(data,'title',$event)">{{ data.title }}</h2>
+        <p class="about-lead" data-cid="about-lead" [style.color]="textColor('about-lead')" [attr.contenteditable]="editMode" (blur)="edit(data,'intro',$event)">{{ data.intro }}</p>
+      </div>
+      <div class="about-card">
+        <h3>Overview</h3>
+        <p data-cid="about-ov" [style.color]="textColor('about-ov')" [attr.contenteditable]="editMode" (blur)="edit(data,'intro',$event)">{{ data.intro }}</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- OBJECTIVES -->
+  <section class="section alt" id="objectives" data-bg="obj-sec" [style.background]="bgColor('obj-sec')" *ngIf="data.objectives.length">
+    <div class="wrap">
+      <span class="eyebrow">What we do</span>
+      <h2 class="section-title" data-cid="obj-h" [style.color]="textColor('obj-h')">Objectives</h2>
+      <div class="obj-grid">
+        <div class="obj" *ngFor="let cd of data.objectives; let i = index"
+             [attr.draggable]="editMode ? true : null"
+             (dragstart)="onDragStart(data.objectives, i)"
+             (dragover)="onDragOver($event)"
+             (drop)="onDrop(data.objectives, i, $event)">
+          <span class="drag-handle" *ngIf="editMode" title="Drag to reorder">⠿</span>
+          <button class="del-card" *ngIf="editMode" (click)="removeFrom(data.objectives, i)" title="Delete card">×</button>
+          <div gt [style.background]="c(OBJ,i)">{{ objIcons[i % objIcons.length] }}</div>
+          <h3 [attr.data-cid]="'obj-t-'+i" [style.color]="textColor('obj-t-'+i)" [attr.contenteditable]="editMode" (blur)="edit(cd,'title',$event)">{{ cd.title }}</h3>
+          <p *ngIf="cd.body || editMode" [attr.data-cid]="'obj-b-'+i" [style.color]="textColor('obj-b-'+i)" [attr.contenteditable]="editMode" (blur)="edit(cd,'body',$event)">{{ cd.body }}</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ACHIEVEMENTS -->
+  <section class="section" id="achievements" data-bg="ach-sec" [style.background]="bgColor('ach-sec')" *ngIf="data.achievements.length">
+    <div class="wrap">
+      <span class="eyebrow">Highlights</span>
+      <h2 class="section-title" data-cid="ach-h" [style.color]="textColor('ach-h')">Key Highlights</h2>
+      <div class="ach-grid">
+        <div class="ach" *ngFor="let cd of data.achievements; let i = index"
+             [attr.draggable]="editMode ? true : null"
+             (dragstart)="onDragStart(data.achievements, i)"
+             (dragover)="onDragOver($event)"
+             (drop)="onDrop(data.achievements, i, $event)">
+          <span class="drag-handle" *ngIf="editMode" title="Drag to reorder">⠿</span>
+          <button class="del-card" *ngIf="editMode" (click)="removeFrom(data.achievements, i)" title="Delete card">×</button>
+          <div class="badge" [style.background]="c(ACH,i)">{{ achIcons[i % achIcons.length] }}</div>
+          <div>
+            <h3 [attr.data-cid]="'ach-t-'+i" [style.color]="textColor('ach-t-'+i)" [attr.contenteditable]="editMode" (blur)="edit(cd,'title',$event)">{{ cd.title }}</h3>
+            <p *ngIf="cd.body || editMode" [attr.data-cid]="'ach-b-'+i" [style.color]="textColor('ach-b-'+i)" [attr.contenteditable]="editMode" (blur)="edit(cd,'body',$event)">{{ cd.body }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROJECTS -->
+  <section class="section" id="impact" data-bg="proj-sec" [style.background]="bgColor('proj-sec')" *ngIf="data.projects.length">
+    <div class="wrap">
+      <span class="eyebrow">On the ground</span>
+      <h2 class="section-title" data-cid="proj-h" [style.color]="textColor('proj-h')">Impact &amp; Status</h2>
+      <div class="proj-grid">
+        <div class="proj" *ngFor="let p of data.projects; let i = index"
+             [attr.draggable]="editMode ? true : null"
+             (dragstart)="onDragStart(data.projects, i)"
+             (dragover)="onDragOver($event)"
+             (drop)="onDrop(data.projects, i, $event)">
+          <span class="drag-handle light" *ngIf="editMode" title="Drag to reorder">⠿</span>
+          <button class="del-card light" *ngIf="editMode" (click)="removeFrom(data.projects, i)" title="Delete card">×</button>
+          <div class="head" [style.background]="c(PROJ,i)">
+            <span class="n">{{ p.code }}</span>
+            <span class="ttl" [attr.contenteditable]="editMode" (blur)="edit(p,'title',$event)">{{ p.title }}</span>
+          </div>
+          <div class="body">
+            <div class="total" [attr.data-cid]="'pr-tot-'+i" [style.color]="textColor('pr-tot-'+i)" [attr.contenteditable]="editMode" (blur)="edit(p,'total',$event)">{{ p.total }}</div>
+            <div class="stat"><span class="k">Completed</span><span class="v" [attr.contenteditable]="editMode" (blur)="edit(p,'completed',$event)">{{ p.completed }}</span></div>
+            <div class="stat"><span class="k">Ongoing</span><span class="v" [attr.contenteditable]="editMode" (blur)="edit(p,'ongoing',$event)">{{ p.ongoing }}</span></div>
+            <div class="stat"><span class="k">Yet to start</span><span class="v" [attr.contenteditable]="editMode" (blur)="edit(p,'pending',$event)">{{ p.pending }}</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SUPPORT -->
+  <section class="section alt" id="support" data-bg="sup-sec" [style.background]="bgColor('sup-sec')" *ngIf="data.support.length">
+    <div class="wrap">
+      <span class="eyebrow">Working together</span>
+      <h2 class="section-title" data-cid="sup-h" [style.color]="textColor('sup-h')">Support</h2>
+      <div class="sup-grid">
+        <div class="sup" *ngFor="let s of data.support; let i = index">
+          <button class="del-dot" *ngIf="editMode" (click)="removeFrom(data.support, i)" title="Remove">×</button>
+          <span class="dot" [style.background]="c(SUP,i)">{{ i + 1 }}</span>
+          <p [attr.data-cid]="'sup-'+i" [style.color]="textColor('sup-'+i)" [attr.contenteditable]="editMode" (blur)="editArr(data.support, i, $event)">{{ s }}</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- DETAILS -->
+  <section class="section" id="details" data-bg="det-sec" [style.background]="bgColor('det-sec')" *ngIf="data.slides.length">
+    <div class="wrap">
+      <span class="eyebrow">Full content</span>
+      <h2 class="section-title" data-cid="det-h" [style.color]="textColor('det-h')">Details</h2>
+      <div class="detail-list">
+        <article class="detail-card" *ngFor="let s of data.slides; let si = index">
+          <button class="del-card" *ngIf="editMode" (click)="removeFrom(data.slides, si)" title="Delete section">×</button>
+          <h3 class="detail-title" *ngIf="s.title || editMode" [attr.data-cid]="'det-t-'+si" [style.color]="textColor('det-t-'+si)" [attr.contenteditable]="editMode" (blur)="edit(s,'title',$event)">{{ s.title }}</h3>
+
+          <p *ngFor="let p of s.paragraphs; let pi = index" [attr.data-cid]="'det-p-'+si+'-'+pi" [style.color]="textColor('det-p-'+si+'-'+pi)" [attr.contenteditable]="editMode" (blur)="editArr(s.paragraphs, pi, $event)">{{ p }}</p>
+
+          <ul *ngIf="s.bullets.length">
+            <li *ngFor="let b of s.bullets; let bi = index">
+              <span [attr.data-cid]="'det-bl-'+si+'-'+bi" [style.color]="textColor('det-bl-'+si+'-'+bi)" [attr.contenteditable]="editMode" (blur)="editArr(s.bullets, bi, $event)">{{ b }}</span>
+              <button class="del-inline" *ngIf="editMode" (click)="removeFrom(s.bullets, bi)">×</button>
+            </li>
+          </ul>
+
+          <!-- TABLES -->
+          <div class="tbl-wrap" *ngFor="let t of s.tables">
+            <table class="data-tbl">
+              <tbody>
+                <tr *ngFor="let row of t.rows; let ri = index">
+                  <ng-container *ngFor="let cell of row; let ci = index">
+                    <th *ngIf="ri === 0" [attr.contenteditable]="editMode" (blur)="editCell(t, ri, ci, $event)">{{ cell }}</th>
+                    <td *ngIf="ri > 0" [attr.contenteditable]="editMode" (blur)="editCell(t, ri, ci, $event)">{{ cell }}</td>
+                  </ng-container>
+                  <td class="row-tools" *ngIf="editMode">
+                    <button class="del-inline" (click)="removeRow(t, ri)" title="Delete row">×</button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <button class="mini add-row" *ngIf="editMode" (click)="addRow(t)">+ Add row</button>
+          </div>
+
+          <!-- IMAGES -->
+          <div class="detail-imgs" *ngIf="s.images.length">
+            <div class="img-edit" *ngFor="let im of s.images; let ii = index">
+              <img [src]="im" alt="">
+              <span class="img-tools" *ngIf="editMode">
+                <label class="mini">Replace<input type="file" accept="image/*" (change)="replaceDetailImg(s.images, ii, $event)" hidden></label>
+                <button class="mini danger" (click)="removeDetailImg(s.images, ii)">Remove</button>
+              </span>
+            </div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta" id="cta" data-bg="cta" [style.background]="bgColor('cta')" *ngIf="data.closingQuote">
+    <div class="wrap inner">
+      <h2 data-cid="cta-title" [style.color]="textColor('cta-title')" [attr.contenteditable]="editMode" (blur)="edit(data,'title',$event)">{{ data.title }}</h2>
+      <p class="quote" data-cid="cta-quote" [style.color]="textColor('cta-quote')" [attr.contenteditable]="editMode" (blur)="edit(data,'closingQuote',$event)">{{ data.closingQuote }}</p>
+    </div>
+  </section>
+
+</div>
